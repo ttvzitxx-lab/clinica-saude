@@ -1,6 +1,15 @@
-# 🌿 Clínica Saúde — Sistema de Agendamentos
+# 🌿 Telemedicina — Sistema de Agendamentos
 
 App completo para clínicas médicas com agendamento online e painel administrativo, construído com **Streamlit**.
+
+## Informações da clínica
+
+- **Nome:** Telemedicina
+- **Telefone:** (11) 93307-537
+- **WhatsApp:** (11) 93307-537 — 24/7
+- **E-mail:** contato@telemedicina.com
+- **Endereço:** 8701 Charleville Blvd, Beverly Hills, CA 90211, EUA
+- **Horário:** 24/7
 
 ## Funcionalidades
 
