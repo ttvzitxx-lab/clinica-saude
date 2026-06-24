@@ -66,7 +66,7 @@ if "admin_logado" not in st.session_state:
     st.session_state.admin_logado = False
 
 with st.sidebar:
-    st.markdown("### 🌿 Clínica Saúde")
+    st.markdown("### 🌿 Telemedicina")
     st.markdown("---")
     if st.button("🏠 Início", use_container_width=True):
         st.session_state.pagina = "site"
@@ -85,12 +85,12 @@ with st.sidebar:
 if st.session_state.pagina == "site":
     st.markdown("""
     <div class="hero">
-      <h1>🌿 Clínica Saúde</h1>
+      <h1>🌿 Telemedicina</h1>
       <p>Cuidando de você e da sua família com atenção, carinho e excelência.<br>
       Agende sua consulta de forma rápida e fácil.</p>
       <div class="badge-row">
-        <span class="badge">🕐 Seg–Sex, 8h–18h</span>
-        <span class="badge">📍 Atendimento presencial</span>
+        <span class="badge">🕐 24/7</span>
+        <span class="badge">📍 Beverly Hills, CA</span>
         <span class="badge">📱 Teleconsulta disponível</span>
       </div>
     </div>
@@ -115,13 +115,13 @@ if st.session_state.pagina == "site":
     st.markdown('<p class="sec-title">📞 Contato rápido</p>', unsafe_allow_html=True)
     st.markdown("""
     <div class="contact-grid">
-      <div class="contact-item"><h4>📞 Telefone</h4><p>(00) 0000-0000<br>(00) 00000-0000</p></div>
-      <div class="contact-item"><h4>💬 WhatsApp</h4><p>(00) 00000-0000<br>Seg–Sex, 8h–18h</p></div>
-      <div class="contact-item"><h4>📧 E-mail</h4><p>contato@clinicasaude.com.br</p></div>
-      <div class="contact-item"><h4>📍 Endereço</h4><p>Rua Exemplo, 123<br>Bairro — Cidade/UF</p></div>
+      <div class="contact-item"><h4>📞 Telefone</h4><p>(11) 93307-537</p></div>
+      <div class="contact-item"><h4>💬 WhatsApp</h4><p>(11) 93307-537<br>24/7</p></div>
+      <div class="contact-item"><h4>📧 E-mail</h4><p>contato@telemedicina.com</p></div>
+      <div class="contact-item"><h4>📍 Endereço</h4><p>8701 Charleville Blvd<br>Beverly Hills, CA 90211</p></div>
     </div>
     """, unsafe_allow_html=True)
-    st.markdown('<div class="footer">© 2026 Clínica Saúde · Todos os direitos reservados</div>', unsafe_allow_html=True)
+    st.markdown('<div class="footer">© 2026 Telemedicina · Todos os direitos reservados</div>', unsafe_allow_html=True)
 
 elif st.session_state.pagina == "agendar":
     st.markdown('<p class="sec-title">📅 Agendar consulta</p>', unsafe_allow_html=True)
@@ -173,10 +173,10 @@ elif st.session_state.pagina == "contato":
 
     st.markdown("""
     <div class="contact-grid">
-      <div class="contact-item"><h4>📞 Telefone</h4><p>(00) 0000-0000<br>(00) 00000-0000</p></div>
-      <div class="contact-item"><h4>💬 WhatsApp</h4><p>(00) 00000-0000<br>Seg–Sex, 8h–18h</p></div>
-      <div class="contact-item"><h4>📧 E-mail</h4><p>contato@clinicasaude.com.br</p></div>
-      <div class="contact-item"><h4>📍 Endereço</h4><p>Rua Exemplo, 123<br>Bairro — Cidade/UF</p></div>
+      <div class="contact-item"><h4>📞 Telefone</h4><p>(11) 93307-537</p></div>
+      <div class="contact-item"><h4>💬 WhatsApp</h4><p>(11) 93307-537<br>24/7</p></div>
+      <div class="contact-item"><h4>📧 E-mail</h4><p>contato@telemedicina.com</p></div>
+      <div class="contact-item"><h4>📍 Endereço</h4><p>8701 Charleville Blvd<br>Beverly Hills, CA 90211</p></div>
     </div>
     """, unsafe_allow_html=True)
 
