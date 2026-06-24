@@ -1,34 +1,50 @@
 import streamlit as st
 import pandas as pd
 import os
+import re
 from datetime import datetime, date
+from openpyxl import load_workbook, Workbook
 
 st.set_page_config(
-    page_title="Clínica Saúde",
+    page_title="Telemedicina",
     page_icon="🌿",
     layout="centered",
 )
 
-DATA_FILE = "agendamentos.csv"
+DATA_FILE = "agendamentos.xlsx"
 ADMIN_PASSWORD = "clinica2024"
 
-COLUNAS = ["ID", "Nome", "Telefone", "Email", "Data", "Horario", "Tipo", "Observacoes", "Recebido_em", "Status"]
+COLUNAS = ["ID", "Nome", "CPF", "Telefone", "Email", "Data", "Horario", "Tipo", "Observacoes", "Recebido_em", "Status"]
+
+def formatar_cpf(cpf):
+    cpf = re.sub(r'\D', '', cpf)
+    if len(cpf) == 11:
+        return f"{cpf[:3]}.{cpf[3:6]}.{cpf[6:9]}-{cpf[9:]}"
+    return cpf
+
+def validar_cpf(cpf):
+    cpf = re.sub(r'\D', '', cpf)
+    return len(cpf) == 11
 
 def carregar_dados():
     if os.path.exists(DATA_FILE):
-        return pd.read_csv(DATA_FILE)
+        return pd.read_excel(DATA_FILE)
     return pd.DataFrame(columns=COLUNAS)
 
 def salvar_agendamento(dados):
-    df = carregar_dados()
+    if os.path.exists(DATA_FILE):
+        df = pd.read_excel(DATA_FILE)
+    else:
+        df = pd.DataFrame(columns=COLUNAS)
     novo_id = len(df) + 1
     dados["ID"] = novo_id
     dados["Recebido_em"] = datetime.now().strftime("%d/%m/%Y %H:%M")
     dados["Status"] = "Aguardando confirmação"
     nova_linha = pd.DataFrame([dados])
     df = pd.concat([df, nova_linha], ignore_index=True)
-    df.to_csv(DATA_FILE, index=False)
+    df.to_excel(DATA_FILE, index=False)
     return novo_id
+
 
 st.markdown("""
 <style>
@@ -134,11 +150,17 @@ elif st.session_state.pagina == "agendar":
         with col2:
             telefone = st.text_input("Telefone / WhatsApp *", placeholder="(00) 00000-0000")
 
+        col_cpf, col_email = st.columns(2)
+        with col_cpf:
+            cpf = st.text_input("CPF *", placeholder="000.000.000-00")
+        with col_email:
+            email = st.text_input("E-mail", placeholder="seu@email.com")
+
         col3, col4 = st.columns(2)
         with col3:
-            email = st.text_input("E-mail", placeholder="seu@email.com")
-        with col4:
             data_pref = st.date_input("Data de preferência", min_value=date.today())
+        with col4:
+            pass
 
         col5, col6 = st.columns(2)
         with col5:
@@ -153,9 +175,12 @@ elif st.session_state.pagina == "agendar":
         if enviado:
             if not nome or not telefone or tipo == "Selecione...":
                 st.error("⚠️ Preencha os campos obrigatórios: Nome, Telefone e Tipo de consulta.")
+            elif not validar_cpf(cpf):
+                st.error("⚠️ CPF inválido. Digite os 11 dígitos.")
             else:
                 dados = {
                     "Nome": nome,
+                    "CPF": formatar_cpf(cpf),
                     "Telefone": telefone,
                     "Email": email if email else "—",
                     "Data": data_pref.strftime("%d/%m/%Y"),
@@ -254,5 +279,7 @@ elif st.session_state.pagina == "admin":
                     st.error("ID não encontrado.")
 
             st.markdown("---")
-            csv = df.to_csv(index=False).encode("utf-8")
-            st.download_button("⬇️ Exportar todos os agendamentos (.csv)", csv, "agendamentos.csv", "text/csv", use_container_width=True)
+            import io
+            buffer = io.BytesIO()
+            df.to_excel(buffer, index=False)
+            st.download_button("⬇️ Exportar agendamentos (.xlsx)", buffer.getvalue(), "agendamentos.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
