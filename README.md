@@ -1,6 +1,6 @@
-# 🌿 Telemedicina — Sistema de Agendamentos
+# ✚ Telemedicina — Sistema de Agendamentos
 
-App completo para clínicas médicas com agendamento online e painel administrativo, construído com **Streamlit**.
+App completo para clínicas médicas com design premium inspirado em marcas de luxo, agendamento online e painel administrativo. Construído com **Streamlit**.
 
 ## Informações da clínica
 
@@ -14,20 +14,28 @@ App completo para clínicas médicas com agendamento online e painel administrat
 ## Funcionalidades
 
 ### Área do paciente
-- Página inicial com apresentação da clínica e serviços
-- Formulário de agendamento com captura completa de dados
+- Página inicial com design premium (fundo preto, tipografia elegante)
+- Cards de serviços em grade estilo editorial
+- Formulário de agendamento com captura de: Nome, CPF, Telefone, E-mail, Data, Horário, Tipo de consulta e Observações
+- Validação de CPF em tempo real
 - Seção de contato com formulário de mensagem
 
-### Área administrativa (`🔒 Área administrativa`)
-- Login com senha
-- Painel com métricas de agendamentos
-- Tabela de todos os pacientes e consultas
+### Área administrativa (`ÁREA ADMINISTRATIVA`)
+- Login com senha protegida
+- Métricas de agendamentos (total, aguardando, confirmados)
+- Tabela completa de pacientes e consultas
 - Filtro por status (Aguardando / Confirmado / Cancelado)
 - Atualização de status por ID
-- Exportação dos dados em `.csv`
+- Exportação da planilha completa em `.xlsx`
 
-**Senha padrão do admin:** `clinica2024`
-> Altere a variável `ADMIN_PASSWORD` no arquivo `app.py` antes de publicar.
+**Senha do admin:** `clinica2024`
+> Altere a variável `ADMIN_PASSWORD` no `app.py` antes de publicar.
+
+## Banco de dados
+
+Os agendamentos são salvos automaticamente em `agendamentos.xlsx` com as colunas:
+
+| ID | Nome | CPF | Telefone | Email | Data | Horario | Tipo | Observacoes | Recebido_em | Status |
 
 ## Como rodar localmente
 
@@ -38,18 +46,18 @@ streamlit run app.py
 
 ## Como publicar no Streamlit Cloud (link público gratuito)
 
-1. Suba este repositório no GitHub (público ou privado)
+1. Repositório já disponível em: [github.com/ttvzitxx-lab/clinica-saude](https://github.com/ttvzitxx-lab/clinica-saude)
 2. Acesse [share.streamlit.io](https://share.streamlit.io) e faça login com o GitHub
-3. Clique em **"New app"** → selecione o repositório → entry point: `app.py`
-4. Clique em **Deploy** — o link público é gerado automaticamente
+3. Clique em **"New app"** → selecione `ttvzitxx-lab/clinica-saude` → entry point: `app.py`
+4. Clique em **Deploy**
 
 ## Estrutura
 
 ```
 .
 ├── app.py               # Aplicação principal
-├── requirements.txt     # Dependências
-├── agendamentos.csv     # Criado automaticamente ao primeiro agendamento
+├── requirements.txt     # Dependências (streamlit, pandas, openpyxl)
+├── agendamentos.xlsx    # Criado automaticamente ao primeiro agendamento
 └── README.md
 ```
 
@@ -59,4 +67,4 @@ Edite `app.py` para alterar:
 - `ADMIN_PASSWORD` — senha do painel admin
 - Nome, endereço, telefone e e-mail da clínica
 - Serviços oferecidos
-- Horários de atendimento
+- Cores e tipografia (seção `<style>`)
