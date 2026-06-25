@@ -1,6 +1,6 @@
-# 🏥 Telemedicina — Sistema de Agendamentos Médicos
+# 🏥 Telemedicina — Portal de Saúde
 
-Plataforma completa de agendamentos médicos com design moderno voltado para saúde e bem-estar. Interface verde profissional, painel administrativo e banco de dados em Excel. Construído com **Streamlit**.
+Plataforma institucional de agendamentos médicos com visual de sistema público, cores verde e amarelo, painel administrativo completo e banco de dados em Excel. Construído com **Streamlit**.
 
 ## Informações da clínica
 
@@ -13,20 +13,30 @@ Plataforma completa de agendamentos médicos com design moderno voltado para sa�
 | **Endereço** | 8701 Charleville Blvd, Beverly Hills, CA 90211 |
 | **Horário** | 24/7 |
 
+## Design
+
+Visual inspirado em portais institucionais públicos de saúde:
+- **Barra superior** com identificação do portal e badge "24/7"
+- **Header institucional** com logo, nome, data e indicador de sistema online
+- **Alerta amarelo** com instruções ao paciente
+- **Breadcrumb** de navegação
+- **Painel hero** verde escuro com destaque amarelo
+- **Sidebar verde escura** com borda amarela
+- Protocolo numerado gerado ao agendar (`#0001`, `#0002`...)
+
 ## Funcionalidades
 
 ### Área do paciente
-- **Página inicial** com hero verde, cards de serviços e faixa de diferenciais
-- **Serviços:** Clínica Geral, Exames & Laudos, Teleconsulta, Acompanhamento
-- **Formulário de agendamento** com: Nome, CPF (validado), Telefone, E-mail, Data, Horário, Tipo de consulta e Observações
-- **Página de contato** com formulário de mensagem
+- Página inicial com painel institucional e cards de serviços
+- Formulário de agendamento com CPF validado e geração de protocolo
+- Página de contato com formulário de mensagem
 
-### Área administrativa (`🔒 Área administrativa`)
+### Área administrativa (`🔒 Área restrita`)
 - Login com senha
 - Métricas: Total, Aguardando, Confirmados, Cancelados
 - Tabela completa de pacientes
 - Filtro por status
-- Atualização de status por ID
+- Atualização de status por protocolo (ID)
 - Exportação em `.xlsx`
 
 **Senha do admin:** `clinica2024`
@@ -42,7 +52,7 @@ Salvo automaticamente em `agendamentos.xlsx`:
 
 ```bash
 pip install -r requirements.txt
-streamlit run app.py
+python -m streamlit run app.py
 ```
 
 ## Deploy no Streamlit Cloud
