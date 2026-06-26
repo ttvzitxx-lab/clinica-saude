@@ -4,12 +4,11 @@ import os
 import re
 import io
 from datetime import datetime, date
-from openpyxl import Workbook
 
 st.set_page_config(
-    page_title="Telemedicina — Portal de Saúde",
-    page_icon="🏥",
-    layout="wide",
+    page_title="Telemedicina",
+    page_icon="✚",
+    layout="centered",
 )
 
 DATA_FILE = "agendamentos.xlsx"
@@ -42,314 +41,135 @@ def salvar_agendamento(dados):
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-html, body, [class*="css"] {
-    font-family: 'IBM Plex Sans', sans-serif;
-}
+html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 
-/* Sidebar */
-section[data-testid="stSidebar"] {
-    background: #1a3a2a !important;
-    border-right: 3px solid #f5c400 !important;
-}
+section[data-testid="stSidebar"] { background: #111 !important; }
 section[data-testid="stSidebar"] * { color: #fff !important; }
-section[data-testid="stSidebar"] .stMarkdown p {
-    color: #a8c5b5 !important;
-    font-size: 0.78rem;
-}
-section[data-testid="stSidebar"] hr {
-    border-color: rgba(255,255,255,0.15) !important;
-}
 section[data-testid="stSidebar"] button {
-    background: rgba(255,255,255,0.06) !important;
-    border: 1px solid rgba(255,255,255,0.12) !important;
-    color: #e8f5ee !important;
-    border-radius: 4px !important;
-    font-size: 0.82rem !important;
-    font-weight: 500 !important;
-    margin-bottom: 3px !important;
-    text-align: left !important;
+    background: #1c1c1c !important;
+    border: 1px solid #2e2e2e !important;
+    color: #ccc !important;
+    border-radius: 6px !important;
+    font-size: 0.83rem !important;
+    margin-bottom: 4px !important;
 }
 section[data-testid="stSidebar"] button:hover {
-    background: rgba(245,196,0,0.15) !important;
-    border-color: #f5c400 !important;
-    color: #f5c400 !important;
+    border-color: #f0c040 !important;
+    color: #f0c040 !important;
+    background: #1a1a1a !important;
 }
 
-/* Gov top bar */
-.gov-topbar {
-    background: #1a3a2a;
-    padding: 0.4rem 1.5rem;
+.header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 0;
-}
-.gov-topbar span {
-    font-size: 0.72rem;
-    color: #a8c5b5;
-    letter-spacing: 0.03em;
-}
-.gov-topbar .gov-badge {
-    background: #f5c400;
-    color: #1a3a2a;
-    font-size: 0.68rem;
-    font-weight: 700;
-    padding: 2px 10px;
-    border-radius: 3px;
-    letter-spacing: 0.06em;
-}
-
-/* Header institucional */
-.inst-header {
-    background: #fff;
-    border-bottom: 4px solid #f5c400;
-    padding: 1rem 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 0;
-}
-.inst-logo {
-    width: 52px; height: 52px;
-    background: #1a6b4a;
-    border-radius: 6px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.6rem;
-    flex-shrink: 0;
-}
-.inst-name {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #1a3a2a;
-    letter-spacing: -0.01em;
-    line-height: 1.2;
-}
-.inst-sub {
-    font-size: 0.72rem;
-    color: #666;
-    margin-top: 2px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-}
-.inst-right {
-    margin-left: auto;
-    text-align: right;
-}
-.inst-right .date-info {
-    font-size: 0.72rem;
-    color: #888;
-}
-.inst-right .status-online {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    background: #e8f5ee;
-    border: 1px solid #b2dfcc;
-    border-radius: 20px;
-    padding: 3px 10px;
-    font-size: 0.7rem;
-    color: #1a6b4a;
-    font-weight: 600;
-    margin-top: 4px;
-}
-.status-dot {
-    width: 7px; height: 7px;
-    background: #1a6b4a;
-    border-radius: 50%;
-    display: inline-block;
-    animation: pulse 2s infinite;
-}
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-}
-
-/* Alerta amarelo */
-.alert-bar {
-    background: #fff8d6;
-    border-left: 5px solid #f5c400;
-    border-bottom: 1px solid #f0dc80;
-    padding: 0.7rem 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 0.82rem;
-    color: #5a4a00;
-    margin-bottom: 1.5rem;
-}
-
-/* Breadcrumb */
-.breadcrumb {
-    font-size: 0.74rem;
-    color: #888;
-    margin-bottom: 1.25rem;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #eee;
-}
-.breadcrumb span { color: #1a6b4a; font-weight: 500; }
-
-/* Painel de boas vindas */
-.welcome-panel {
-    background: linear-gradient(135deg, #1a6b4a 0%, #1a3a2a 100%);
-    border-radius: 8px;
-    padding: 2rem 2.5rem;
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 2rem;
-    border: 2px solid #f5c400;
-    position: relative;
-    overflow: hidden;
-}
-.welcome-panel::before {
-    content: '';
-    position: absolute;
-    top: 0; right: 0;
-    width: 200px; height: 100%;
-    background: repeating-linear-gradient(
-        -45deg,
-        transparent, transparent 8px,
-        rgba(245,196,0,0.07) 8px, rgba(245,196,0,0.07) 16px
-    );
-}
-.welcome-panel h2 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #fff;
-    margin-bottom: 0.4rem;
-    letter-spacing: -0.02em;
-}
-.welcome-panel p { font-size: 0.88rem; color: #a8c5b5; line-height: 1.6; margin-bottom: 1rem; }
-.welcome-pills { display: flex; gap: 8px; flex-wrap: wrap; }
-.pill-green {
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.2);
-    color: #fff;
-    font-size: 0.72rem;
-    padding: 4px 12px;
-    border-radius: 3px;
-    font-weight: 500;
-}
-.pill-yellow {
-    background: #f5c400;
-    color: #1a3a2a;
-    font-size: 0.72rem;
-    padding: 4px 12px;
-    border-radius: 3px;
-    font-weight: 700;
-}
-.welcome-nums {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    min-width: 180px;
-}
-.num-box {
-    background: rgba(245,196,0,0.12);
-    border: 1px solid rgba(245,196,0,0.35);
-    border-radius: 6px;
-    padding: 0.8rem 1rem;
-    text-align: center;
-}
-.num-box .nb { font-size: 1.5rem; font-weight: 700; color: #f5c400; }
-.num-box .nl { font-size: 0.7rem; color: rgba(255,255,255,0.7); margin-top: 2px; }
-
-/* Cards de serviço */
-.serv-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-    gap: 14px;
+    padding: 1.25rem 0 1rem;
+    border-bottom: 2px solid #111;
     margin-bottom: 2rem;
 }
-.serv-card {
-    background: #fff;
-    border: 1px solid #dde8e2;
+.header-left { display: flex; align-items: center; gap: 12px; }
+.cross-badge {
+    width: 40px; height: 40px;
+    background: #111;
     border-radius: 6px;
-    padding: 1.25rem;
-    border-top: 3px solid #1a6b4a;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; color: #f0c040;
+    font-weight: 700; flex-shrink: 0;
 }
-.serv-card:nth-child(2) { border-top-color: #f5c400; }
-.serv-card:nth-child(4) { border-top-color: #f5c400; }
-.serv-card .sic { font-size: 1.8rem; margin-bottom: 0.6rem; display: block; }
-.serv-card h4 {
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: #1a3a2a;
-    margin-bottom: 0.3rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+.brand-name { font-size: 1.2rem; font-weight: 700; color: #111; }
+.brand-tagline { font-size: 0.72rem; color: #888; margin-top: 1px; }
+.online-badge {
+    background: #f0c040;
+    color: #111;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
 }
-.serv-card p { font-size: 0.78rem; color: #666; line-height: 1.6; margin: 0; }
 
-/* Seção título gov */
-.gov-section {
+.hero {
+    background: #111;
+    border-radius: 10px;
+    padding: 2.5rem 2rem;
+    margin-bottom: 2rem;
+}
+.hero h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.25;
+    margin-bottom: 0.6rem;
+    letter-spacing: -0.03em;
+}
+.hero h1 span { color: #f0c040; }
+.hero p { font-size: 0.88rem; color: #aaa; line-height: 1.7; margin-bottom: 1.25rem; }
+.hero-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+.pill {
+    background: #1e1e1e;
+    border: 1px solid #333;
+    color: #ccc;
+    font-size: 0.72rem;
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+.pill.yellow { background: #f0c040; color: #111; border-color: #f0c040; font-weight: 600; }
+
+.section-title {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 0.75rem;
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 1rem;
-    padding-bottom: 0.6rem;
-    border-bottom: 2px solid #1a6b4a;
+    gap: 8px;
 }
-.gov-section h3 {
-    font-size: 0.92rem;
-    font-weight: 700;
-    color: #1a3a2a;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin: 0;
-}
-.gov-section .gov-tag {
-    background: #f5c400;
-    color: #1a3a2a;
-    font-size: 0.65rem;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 2px;
-    letter-spacing: 0.06em;
+.section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #eee;
 }
 
-/* Contato */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 2rem;
+}
+.card {
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+    padding: 1.25rem 1rem;
+}
+.card .ic { font-size: 1.6rem; margin-bottom: 0.6rem; display: block; }
+.card h4 { font-size: 0.83rem; font-weight: 600; color: #111; margin-bottom: 0.3rem; }
+.card p { font-size: 0.76rem; color: #777; line-height: 1.6; margin: 0; }
+.card.highlight { border-top: 3px solid #f0c040; }
+
 .contact-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
     margin-bottom: 1.5rem;
 }
-.contact-card {
-    background: #fff;
-    border: 1px solid #dde8e2;
-    border-radius: 6px;
+.ccard {
+    background: #fafafa;
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
     padding: 1rem;
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
 }
-.cc-icon {
-    width: 36px; height: 36px;
-    background: #e8f5ee;
-    border-radius: 4px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1rem; flex-shrink: 0;
-    border: 1px solid #b2dfcc;
-}
-.contact-card h5 {
-    font-size: 0.65rem;
-    color: #1a6b4a;
-    font-weight: 700;
-    margin: 0 0 3px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-}
-.contact-card p { font-size: 0.82rem; color: #333; margin: 0; line-height: 1.5; }
+.ccard h5 { font-size: 0.65rem; font-weight: 700; color: #f0c040; margin: 0 0 4px; text-transform: uppercase; letter-spacing: 0.1em; background: #111; display: inline-block; padding: 2px 7px; border-radius: 3px; }
+.ccard p { font-size: 0.82rem; color: #333; margin: 0; line-height: 1.6; }
 
-/* Footer gov */
-.gov-footer {
-    background: #1a3a2a;
-    border-top: 3px solid #f5c400;
-    border-radius: 6px;
+.footer {
+    background: #111;
+    border-radius: 8px;
     padding: 1rem 1.5rem;
     display: flex;
     align-items: center;
@@ -358,10 +178,10 @@ section[data-testid="stSidebar"] button:hover {
     gap: 0.5rem;
     margin-top: 2rem;
 }
-.gov-footer p { color: #a8c5b5; font-size: 0.75rem; margin: 0; }
-.gov-footer strong { color: #f5c400; }
+.footer p { color: #666; font-size: 0.74rem; margin: 0; }
+.footer strong { color: #f0c040; }
 
-.divider { border: none; border-top: 1px solid #e8eee8; margin: 2rem 0; }
+.divider { border: none; border-top: 1px solid #f0f0f0; margin: 2rem 0; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -372,154 +192,119 @@ if "admin_logado" not in st.session_state:
 
 with st.sidebar:
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("### 🏥 TELEMEDICINA")
-    st.markdown("Portal de Saúde · Beverly Hills")
+    st.markdown("### ✚ Telemedicina")
+    st.markdown("Beverly Hills · 24/7")
     st.markdown("---")
-    if st.button("🏠  Página inicial", use_container_width=True):
+    if st.button("🏠  Início", use_container_width=True):
         st.session_state.pagina = "site"
         st.rerun()
     if st.button("📅  Agendar consulta", use_container_width=True):
         st.session_state.pagina = "agendar"
         st.rerun()
-    if st.button("📞  Fale conosco", use_container_width=True):
+    if st.button("📞  Contato", use_container_width=True):
         st.session_state.pagina = "contato"
         st.rerun()
     st.markdown("---")
-    if st.button("🔒  Área restrita", use_container_width=True):
+    if st.button("🔒  Área administrativa", use_container_width=True):
         st.session_state.pagina = "admin"
         st.rerun()
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("""
-    <div style='background:rgba(245,196,0,0.1);border:1px solid rgba(245,196,0,0.3);border-radius:6px;padding:12px;font-size:0.78rem;color:#a8c5b5;line-height:1.7;'>
-    📍 8701 Charleville Blvd<br>Beverly Hills, CA 90211<br><br>
-    📞 (11) 93307-537<br>
-    💬 WhatsApp 24/7<br>
-    📧 contato@telemedicina.com
-    </div>
-    """, unsafe_allow_html=True)
-
-hoje = datetime.now().strftime("%d/%m/%Y — %H:%M")
 
 if st.session_state.pagina == "site":
 
-    st.markdown(f"""
-    <div class="gov-topbar">
-      <span>🏥 Portal Oficial de Saúde · Telemedicina</span>
-      <span class="gov-badge">ATENDIMENTO 24/7</span>
-    </div>
-    <div class="inst-header">
-      <div class="inst-logo">🏥</div>
-      <div>
-        <div class="inst-name">Telemedicina</div>
-        <div class="inst-sub">Portal de Agendamento e Atendimento Médico Online</div>
-      </div>
-      <div class="inst-right">
-        <div class="date-info">{hoje}</div>
-        <div class="status-online"><span class="status-dot"></span> Sistema online</div>
-      </div>
-    </div>
-    <div class="alert-bar">
-      ⚠️ <strong>Atenção:</strong> Para agendar sua consulta, tenha em mãos seu CPF e número de telefone. Atendimento 24h disponível.
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown('<div class="breadcrumb">Início › Portal de Saúde › <span>Página Inicial</span></div>', unsafe_allow_html=True)
-
     st.markdown("""
-    <div class="welcome-panel">
-      <div>
-        <h2>Sua saúde é nossa prioridade.</h2>
-        <p>Agende sua consulta médica presencial ou online de forma<br>rápida, segura e sem burocracia. Disponível 24 horas por dia.</p>
-        <div class="welcome-pills">
-          <span class="pill-yellow">✚ Atendimento 24/7</span>
-          <span class="pill-green">💻 Teleconsulta disponível</span>
-          <span class="pill-green">📍 Beverly Hills, CA</span>
-          <span class="pill-green">🔒 Dados protegidos</span>
+    <div class="header">
+      <div class="header-left">
+        <div class="cross-badge">✚</div>
+        <div>
+          <div class="brand-name">Telemedicina</div>
+          <div class="brand-tagline">Beverly Hills, CA · Atendimento médico online e presencial</div>
         </div>
       </div>
-      <div class="welcome-nums">
-        <div class="num-box"><div class="nb">24/7</div><div class="nl">Horas de atendimento</div></div>
-        <div class="num-box"><div class="nb">100%</div><div class="nl">Online & Presencial</div></div>
-        <div class="num-box"><div class="nb">🏅</div><div class="nl">Profissionais certificados</div></div>
+      <span class="online-badge">24/7 ONLINE</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class="hero">
+      <h1>Sua saúde em<br><span>boas mãos.</span></h1>
+      <p>Consultas médicas presenciais e online com profissionais certificados.<br>Agende em minutos, sem burocracia.</p>
+      <div class="hero-pills">
+        <span class="pill yellow">✚ Disponível 24/7</span>
+        <span class="pill">💻 Teleconsulta</span>
+        <span class="pill">📍 Beverly Hills</span>
+        <span class="pill">🔒 Dados protegidos</span>
       </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class="gov-section">
-      <h3>Serviços disponíveis</h3>
-      <span class="gov-tag">ACESSO PÚBLICO</span>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class="serv-grid">
-      <div class="serv-card"><span class="sic">🩺</span><h4>Clínica Geral</h4><p>Consultas e check-ups completos para toda a família</p></div>
-      <div class="serv-card"><span class="sic">📋</span><h4>Exames & Laudos</h4><p>Solicitação e análise detalhada de resultados</p></div>
-      <div class="serv-card"><span class="sic">💻</span><h4>Teleconsulta</h4><p>Atendimento médico online, onde você estiver</p></div>
-      <div class="serv-card"><span class="sic">❤️‍🩹</span><h4>Acompanhamento</h4><p>Retornos e monitoramento contínuo da saúde</p></div>
     </div>
     """, unsafe_allow_html=True)
 
     col_btn = st.columns([1, 2, 1])
     with col_btn[1]:
-        if st.button("📅  AGENDAR MINHA CONSULTA", use_container_width=True):
+        if st.button("📅  Agendar minha consulta", use_container_width=True):
             st.session_state.pagina = "agendar"
             st.rerun()
 
     st.markdown('<hr class="divider">', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Serviços</div>', unsafe_allow_html=True)
 
     st.markdown("""
-    <div class="gov-section">
-      <h3>Informações de contato</h3>
+    <div class="card-grid">
+      <div class="card highlight">
+        <span class="ic">🩺</span>
+        <h4>Clínica Geral</h4>
+        <p>Consultas e check-ups para toda a família</p>
+      </div>
+      <div class="card">
+        <span class="ic">📋</span>
+        <h4>Exames & Laudos</h4>
+        <p>Solicitação e análise de resultados</p>
+      </div>
+      <div class="card highlight">
+        <span class="ic">💻</span>
+        <h4>Teleconsulta</h4>
+        <p>Atendimento online de qualquer lugar</p>
+      </div>
+      <div class="card">
+        <span class="ic">❤️‍🩹</span>
+        <h4>Acompanhamento</h4>
+        <p>Retornos e monitoramento contínuo</p>
+      </div>
     </div>
     """, unsafe_allow_html=True)
+
+    st.markdown('<hr class="divider">', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Contato</div>', unsafe_allow_html=True)
 
     st.markdown("""
     <div class="contact-grid">
-      <div class="contact-card"><div class="cc-icon">📞</div><div><h5>Telefone</h5><p>(11) 93307-537</p></div></div>
-      <div class="contact-card"><div class="cc-icon">💬</div><div><h5>WhatsApp</h5><p>(11) 93307-537 · 24/7</p></div></div>
-      <div class="contact-card"><div class="cc-icon">📧</div><div><h5>E-mail</h5><p>contato@telemedicina.com</p></div></div>
-      <div class="contact-card"><div class="cc-icon">📍</div><div><h5>Endereço</h5><p>8701 Charleville Blvd<br>Beverly Hills, CA 90211</p></div></div>
+      <div class="ccard"><h5>Telefone</h5><p>(11) 93307-537</p></div>
+      <div class="ccard"><h5>WhatsApp</h5><p>(11) 93307-537<br>24/7</p></div>
+      <div class="ccard"><h5>E-mail</h5><p>contato@telemedicina.com</p></div>
+      <div class="ccard"><h5>Endereço</h5><p>8701 Charleville Blvd<br>Beverly Hills, CA 90211</p></div>
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown("""
-    <div class="gov-footer">
-      <p><strong>✚ TELEMEDICINA</strong> · Portal Oficial de Saúde · Beverly Hills, CA</p>
-      <p>© 2026 · Todos os direitos reservados · Atendimento 24/7</p>
+    <div class="footer">
+      <p><strong>✚ Telemedicina</strong> · Beverly Hills, CA</p>
+      <p>© 2026 · Todos os direitos reservados</p>
     </div>
     """, unsafe_allow_html=True)
 
 elif st.session_state.pagina == "agendar":
-    st.markdown(f"""
-    <div class="gov-topbar">
-      <span>🏥 Portal Oficial de Saúde · Telemedicina</span>
-      <span class="gov-badge">ATENDIMENTO 24/7</span>
-    </div>
-    <div class="inst-header">
-      <div class="inst-logo">🏥</div>
-      <div>
-        <div class="inst-name">Telemedicina</div>
-        <div class="inst-sub">Portal de Agendamento e Atendimento Médico Online</div>
-      </div>
-      <div class="inst-right">
-        <div class="date-info">{hoje}</div>
-        <div class="status-online"><span class="status-dot"></span> Sistema online</div>
-      </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown('<div class="breadcrumb">Início › <span>Agendar Consulta</span></div>', unsafe_allow_html=True)
-
     st.markdown("""
-    <div class="gov-section">
-      <h3>Formulário de agendamento</h3>
-      <span class="gov-tag">CAMPOS * OBRIGATÓRIOS</span>
+    <div class="header">
+      <div class="header-left">
+        <div class="cross-badge">✚</div>
+        <div>
+          <div class="brand-name">Telemedicina</div>
+          <div class="brand-tagline">Agendamento de consulta</div>
+        </div>
+      </div>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<p style="font-size:0.83rem;color:#666;margin-bottom:1.25rem;">Preencha os dados abaixo com atenção. Nossa equipe entrará em contato para confirmar o horário.</p>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Formulário de agendamento</div>', unsafe_allow_html=True)
+    st.markdown('<p style="font-size:0.84rem;color:#666;margin-bottom:1.25rem;">Preencha os campos abaixo. Entraremos em contato para confirmar o horário.</p>', unsafe_allow_html=True)
 
     with st.form("form_agendamento", clear_on_submit=True):
         col1, col2 = st.columns(2)
@@ -541,13 +326,13 @@ elif st.session_state.pagina == "agendar":
             horario = st.selectbox("Horário preferido", ["Sem preferência", "Manhã (8h–12h)", "Tarde (13h–18h)"])
 
         tipo = st.selectbox("Tipo de consulta *", ["Selecione...", "Consulta presencial", "Teleconsulta", "Retorno", "Check-up"])
-        obs = st.text_area("Motivo da consulta / Observações", placeholder="Descreva brevemente o motivo da consulta ou informações importantes para o médico...")
+        obs = st.text_area("Observações", placeholder="Motivo da consulta ou informações importantes para o médico...")
 
-        enviado = st.form_submit_button("✅  CONFIRMAR AGENDAMENTO", use_container_width=True)
+        enviado = st.form_submit_button("✅  Enviar agendamento", use_container_width=True)
 
         if enviado:
             if not nome or not telefone or tipo == "Selecione...":
-                st.error("⚠️ Preencha os campos obrigatórios: Nome, Telefone e Tipo de consulta.")
+                st.error("⚠️ Preencha: Nome, Telefone e Tipo de consulta.")
             elif not validar_cpf(cpf):
                 st.error("⚠️ CPF inválido. Digite os 11 dígitos.")
             else:
@@ -557,79 +342,72 @@ elif st.session_state.pagina == "agendar":
                     "Horario": horario, "Tipo": tipo, "Observacoes": obs if obs else "—",
                 }
                 novo_id = salvar_agendamento(dados)
-                st.success(f"✅ **Protocolo #{novo_id:04d} gerado com sucesso!** Guarde este número. Nossa equipe entrará em contato em breve para confirmar.")
+                st.success(f"✅ **Protocolo #{novo_id:04d} gerado!** Entraremos em contato em breve para confirmar.")
                 st.balloons()
 
 elif st.session_state.pagina == "contato":
-    st.markdown(f"""
-    <div class="gov-topbar">
-      <span>🏥 Portal Oficial de Saúde · Telemedicina</span>
-      <span class="gov-badge">ATENDIMENTO 24/7</span>
-    </div>
-    <div class="inst-header">
-      <div class="inst-logo">🏥</div>
-      <div>
-        <div class="inst-name">Telemedicina</div>
-        <div class="inst-sub">Portal de Agendamento e Atendimento Médico Online</div>
+    st.markdown("""
+    <div class="header">
+      <div class="header-left">
+        <div class="cross-badge">✚</div>
+        <div>
+          <div class="brand-name">Telemedicina</div>
+          <div class="brand-tagline">Fale conosco</div>
+        </div>
       </div>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="breadcrumb">Início › <span>Fale Conosco</span></div>', unsafe_allow_html=True)
-
+    st.markdown('<div class="section-title">Canais de atendimento</div>', unsafe_allow_html=True)
     st.markdown("""
-    <div class="gov-section"><h3>Canais de atendimento</h3></div>
     <div class="contact-grid">
-      <div class="contact-card"><div class="cc-icon">📞</div><div><h5>Telefone</h5><p>(11) 93307-537</p></div></div>
-      <div class="contact-card"><div class="cc-icon">💬</div><div><h5>WhatsApp</h5><p>(11) 93307-537 · 24/7</p></div></div>
-      <div class="contact-card"><div class="cc-icon">📧</div><div><h5>E-mail</h5><p>contato@telemedicina.com</p></div></div>
-      <div class="contact-card"><div class="cc-icon">📍</div><div><h5>Endereço</h5><p>8701 Charleville Blvd<br>Beverly Hills, CA 90211</p></div></div>
+      <div class="ccard"><h5>Telefone</h5><p>(11) 93307-537</p></div>
+      <div class="ccard"><h5>WhatsApp</h5><p>(11) 93307-537<br>24/7</p></div>
+      <div class="ccard"><h5>E-mail</h5><p>contato@telemedicina.com</p></div>
+      <div class="ccard"><h5>Endereço</h5><p>8701 Charleville Blvd<br>Beverly Hills, CA 90211</p></div>
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown('<hr class="divider">', unsafe_allow_html=True)
-    st.markdown("""<div class="gov-section"><h3>Enviar mensagem</h3></div>""", unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Enviar mensagem</div>', unsafe_allow_html=True)
 
     with st.form("form_contato", clear_on_submit=True):
-        nome_c = st.text_input("Nome completo", placeholder="Seu nome")
+        nome_c = st.text_input("Nome", placeholder="Seu nome completo")
         email_c = st.text_input("E-mail ou telefone", placeholder="Para retorno de contato")
         msg = st.text_area("Mensagem", placeholder="Como podemos te ajudar?", height=120)
-        enviar_c = st.form_submit_button("✅  ENVIAR MENSAGEM", use_container_width=True)
+        enviar_c = st.form_submit_button("✅  Enviar mensagem", use_container_width=True)
         if enviar_c:
             if not nome_c or not msg:
                 st.error("Preencha nome e mensagem.")
             else:
-                st.success("✅ Mensagem enviada com sucesso! Entraremos em contato em breve.")
+                st.success("✅ Mensagem enviada! Entraremos em contato em breve.")
 
 elif st.session_state.pagina == "admin":
     if not st.session_state.admin_logado:
         st.markdown("""
-        <div class="gov-topbar"><span>🔒 Área Restrita · Telemedicina</span></div>
-        <div class="inst-header">
-          <div class="inst-logo">🔒</div>
-          <div>
-            <div class="inst-name">Área Administrativa</div>
-            <div class="inst-sub">Acesso restrito à equipe autorizada</div>
+        <div class="header">
+          <div class="header-left">
+            <div class="cross-badge">🔒</div>
+            <div>
+              <div class="brand-name">Área Administrativa</div>
+              <div class="brand-tagline">Acesso restrito</div>
+            </div>
           </div>
         </div>
         """, unsafe_allow_html=True)
         col_l = st.columns([1, 2, 1])
         with col_l[1]:
-            st.markdown('<br>', unsafe_allow_html=True)
-            senha = st.text_input("Senha de acesso", type="password")
-            if st.button("🔓  ACESSAR PAINEL", use_container_width=True):
+            senha = st.text_input("Senha", type="password")
+            if st.button("🔓  Acessar", use_container_width=True):
                 if senha == ADMIN_PASSWORD:
                     st.session_state.admin_logado = True
                     st.rerun()
                 else:
-                    st.error("Senha incorreta. Acesso negado.")
+                    st.error("Senha incorreta.")
     else:
-        st.markdown("""
-        <div class="gov-topbar"><span>🗂️ Painel Administrativo · Telemedicina</span><span class="gov-badge">ÁREA RESTRITA</span></div>
-        """, unsafe_allow_html=True)
-        st.markdown("""<div class="gov-section"><h3>Painel de agendamentos</h3><span class="gov-tag">RESTRITO</span></div>""", unsafe_allow_html=True)
+        st.markdown('<div class="section-title">Painel de agendamentos</div>', unsafe_allow_html=True)
 
-        if st.button("🚪  Encerrar sessão"):
+        if st.button("🚪  Sair"):
             st.session_state.admin_logado = False
             st.session_state.pagina = "site"
             st.rerun()
@@ -645,37 +423,35 @@ elif st.session_state.pagina == "admin":
             cancelados = len(df[df["Status"] == "Cancelado"]) if "Status" in df.columns else 0
 
             c1, c2, c3, c4 = st.columns(4)
-            c1.metric("📋 Total", total)
-            c2.metric("⏳ Aguardando", aguardando)
-            c3.metric("✅ Confirmados", confirmados)
-            c4.metric("❌ Cancelados", cancelados)
+            c1.metric("Total", total)
+            c2.metric("Aguardando", aguardando)
+            c3.metric("Confirmados", confirmados)
+            c4.metric("Cancelados", cancelados)
 
             st.markdown("---")
-            st.markdown("""<div class="gov-section"><h3>Lista de agendamentos</h3></div>""", unsafe_allow_html=True)
-            status_filtro = st.selectbox("Filtrar por status", ["Todos", "Aguardando confirmação", "Confirmado", "Cancelado"])
+            status_filtro = st.selectbox("Filtrar", ["Todos", "Aguardando confirmação", "Confirmado", "Cancelado"])
             df_view = df if status_filtro == "Todos" else df[df["Status"] == status_filtro]
             st.dataframe(df_view, use_container_width=True, hide_index=True)
 
             st.markdown("---")
-            st.markdown("""<div class="gov-section"><h3>Atualizar status</h3></div>""", unsafe_allow_html=True)
             col_a, col_b = st.columns(2)
             with col_a:
-                id_sel = st.number_input("Número do protocolo (ID)", min_value=1, step=1)
+                id_sel = st.number_input("ID do protocolo", min_value=1, step=1)
             with col_b:
                 novo_status = st.selectbox("Novo status", ["Aguardando confirmação", "Confirmado", "Cancelado"])
-            if st.button("✅  ATUALIZAR STATUS", use_container_width=True):
+            if st.button("✅  Atualizar status", use_container_width=True):
                 df_full = carregar_dados()
                 if id_sel in df_full["ID"].values:
                     df_full.loc[df_full["ID"] == id_sel, "Status"] = novo_status
                     df_full.to_excel(DATA_FILE, index=False)
-                    st.success(f"Protocolo #{int(id_sel):04d} atualizado para **{novo_status}**.")
+                    st.success(f"Protocolo #{int(id_sel):04d} → {novo_status}")
                     st.rerun()
                 else:
-                    st.error("Protocolo não encontrado.")
+                    st.error("ID não encontrado.")
 
             st.markdown("---")
             buffer = io.BytesIO()
             df.to_excel(buffer, index=False)
-            st.download_button("⬇️  EXPORTAR PLANILHA DE AGENDAMENTOS (.xlsx)", buffer.getvalue(),
+            st.download_button("⬇️  Exportar agendamentos (.xlsx)", buffer.getvalue(),
                 "agendamentos.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 use_container_width=True)
