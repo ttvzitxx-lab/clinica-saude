@@ -5,6 +5,7 @@ import re
 import io
 from datetime import datetime, date
 from openpyxl import Workbook
+import contracts_backend as cb
 
 st.set_page_config(
     page_title="Telemedicina — Portal de Saúde",
@@ -385,6 +386,9 @@ with st.sidebar:
         st.session_state.pagina = "contato"
         st.rerun()
     st.markdown("---")
+    if st.button("📄  Contratos", use_container_width=True):
+        st.session_state.pagina = "contratos"
+        st.rerun()
     if st.button("🔒  Área restrita", use_container_width=True):
         st.session_state.pagina = "admin"
         st.rerun()
@@ -679,3 +683,224 @@ elif st.session_state.pagina == "admin":
             st.download_button("⬇️  EXPORTAR PLANILHA DE AGENDAMENTOS (.xlsx)", buffer.getvalue(),
                 "agendamentos.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 use_container_width=True)
+
+elif st.session_state.pagina == "contratos":
+    st.markdown(f"""
+    <div class="gov-topbar">
+      <span>📄 Gestão de Contratos · Telemedicina</span>
+      <span class="gov-badge">INTERNO</span>
+    </div>
+    <div class="inst-header">
+      <div class="inst-logo">📄</div>
+      <div>
+        <div class="inst-name">Contratos</div>
+        <div class="inst-sub">Gestão e acompanhamento de documentos contratuais</div>
+      </div>
+      <div class="inst-right">
+        <div class="date-info">{hoje}</div>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<div class="breadcrumb">Início › <span>Contratos</span></div>', unsafe_allow_html=True)
+
+    stats = cb.stats()
+
+    # ── Métricas de topo ────────────────────────────────────────────────────
+    c1, c2, c3, c4, c5 = st.columns(5)
+    c1.metric("📋 Total", stats["total"])
+    c2.metric("⏳ Pendentes", stats["pendentes"],
+              delta=f"🔴 {stats['pendentes_alta_prioridade']} urgentes" if stats["pendentes_alta_prioridade"] else None,
+              delta_color="inverse")
+    c3.metric("🔍 Em Revisão", stats["em_revisao"])
+    c4.metric("✅ Lidos", stats["lidos"])
+    c5.metric("🗄️ Arquivados", stats["arquivados"])
+
+    if stats["pendentes_alta_prioridade"]:
+        st.warning(f"⚠️ **{stats['pendentes_alta_prioridade']} contrato(s) pendente(s) com prioridade ALTA** aguardam leitura.")
+
+    st.markdown("---")
+
+    # ── Abas principais ─────────────────────────────────────────────────────
+    aba_pendentes, aba_revisao, aba_lidos, aba_arquivados, aba_todos, aba_novo = st.tabs([
+        f"⏳ Pendentes ({stats['pendentes']})",
+        f"🔍 Em Revisão ({stats['em_revisao']})",
+        f"✅ Lidos ({stats['lidos']})",
+        f"🗄️ Arquivados ({stats['arquivados']})",
+        f"📋 Todos ({stats['total']})",
+        "➕ Novo Contrato",
+    ])
+
+    COLUNAS_EXIB = ["ID", "Nome", "Tipo", "Parte_A", "Parte_B", "Prioridade", "Adicionado_em", "Arquivo"]
+
+    def _badge_prioridade(p):
+        cores = {"Alta": "🔴", "Média": "🟡", "Baixa": "🟢"}
+        return f"{cores.get(p, '')} {p}"
+
+    def _painel_contrato(df_aba: pd.DataFrame, mostrar_marcar_lido=False, mostrar_reabrir=False):
+        if df_aba.empty:
+            st.info("Nenhum contrato nesta categoria.")
+            return
+
+        # Filtros rápidos
+        col_f1, col_f2, col_f3 = st.columns(3)
+        with col_f1:
+            tipos_aba = ["Todos"] + sorted(df_aba["Tipo"].dropna().unique().tolist())
+            filtro_tipo = st.selectbox("Tipo", tipos_aba, key=f"ftipo_{mostrar_marcar_lido}_{mostrar_reabrir}")
+        with col_f2:
+            prios_aba = ["Todas"] + sorted(df_aba["Prioridade"].dropna().unique().tolist())
+            filtro_prio = st.selectbox("Prioridade", prios_aba, key=f"fprio_{mostrar_marcar_lido}_{mostrar_reabrir}")
+        with col_f3:
+            busca = st.text_input("Buscar por nome / parte", key=f"busca_{mostrar_marcar_lido}_{mostrar_reabrir}")
+
+        df_f = df_aba.copy()
+        if filtro_tipo != "Todos":
+            df_f = df_f[df_f["Tipo"] == filtro_tipo]
+        if filtro_prio != "Todas":
+            df_f = df_f[df_f["Prioridade"] == filtro_prio]
+        if busca:
+            mask = (df_f["Nome"].str.contains(busca, case=False, na=False) |
+                    df_f["Parte_A"].str.contains(busca, case=False, na=False) |
+                    df_f["Parte_B"].str.contains(busca, case=False, na=False))
+            df_f = df_f[mask]
+
+        st.caption(f"{len(df_f)} contrato(s) exibido(s)")
+
+        for _, row in df_f.iterrows():
+            cid = int(row["ID"])
+            prio_icon = {"Alta": "🔴", "Média": "🟡", "Baixa": "🟢"}.get(str(row.get("Prioridade", "")), "")
+            titulo = f"{prio_icon} **#{cid:04d}** — {row['Nome']}  `{row['Tipo']}`"
+            with st.expander(titulo):
+                col_i, col_a = st.columns([2, 1])
+                with col_i:
+                    st.markdown(f"**Parte A:** {row.get('Parte_A','—')}")
+                    st.markdown(f"**Parte B:** {row.get('Parte_B','—')}")
+                    st.markdown(f"**Descrição:** {row.get('Descricao','—')}")
+                    if str(row.get("Tags","")).strip():
+                        st.markdown(f"**Tags:** `{row['Tags']}`")
+                    if str(row.get("Lido_em","")).strip():
+                        st.markdown(f"**Lido em:** {row['Lido_em']}  |  **Lido por:** {row.get('Lido_por','—')}")
+                    obs_atual = str(row.get("Observacoes",""))
+                    nova_obs = st.text_area("Observações", value=obs_atual, key=f"obs_{cid}", height=80)
+                    if st.button("💾 Salvar observação", key=f"salv_obs_{cid}"):
+                        cb.atualizar_observacoes(cid, nova_obs)
+                        st.success("Observação salva!")
+                        st.rerun()
+
+                with col_a:
+                    st.markdown(f"**Adicionado:** {row.get('Adicionado_em','—')}")
+                    st.markdown(f"**Prioridade:** {prio_icon} {row.get('Prioridade','—')}")
+                    if str(row.get("Tamanho_KB", 0)) not in ("", "0", "0.0"):
+                        st.markdown(f"**Arquivo:** {row.get('Arquivo','—')} ({row.get('Tamanho_KB','?')} KB)")
+
+                    arq_bytes, arq_nome = cb.obter_arquivo(cid)
+                    if arq_bytes:
+                        st.download_button("⬇️ Baixar arquivo", arq_bytes, arq_nome, key=f"dl_{cid}")
+
+                    st.markdown("**Alterar status:**")
+                    novo_st = st.selectbox("", cb.STATUS_OPTIONS,
+                                           index=cb.STATUS_OPTIONS.index(row["Status"]) if row["Status"] in cb.STATUS_OPTIONS else 0,
+                                           key=f"st_{cid}")
+
+                    if mostrar_marcar_lido and novo_st == "Lido":
+                        lido_por = st.text_input("Lido por (nome)", key=f"lp_{cid}")
+                        if st.button("✅ Marcar como Lido", key=f"mlido_{cid}"):
+                            if not lido_por.strip():
+                                st.warning("Informe quem leu.")
+                            else:
+                                cb.marcar_como_lido(cid, lido_por)
+                                st.success("Marcado como lido!")
+                                st.rerun()
+                    else:
+                        if st.button("💾 Atualizar Status", key=f"upst_{cid}"):
+                            cb.atualizar_status(cid, novo_st)
+                            st.success(f"Status → {novo_st}")
+                            st.rerun()
+
+                    st.markdown("---")
+                    if st.button("🗑️ Excluir", key=f"del_{cid}", type="secondary"):
+                        cb.excluir_contrato(cid)
+                        st.warning("Contrato excluído.")
+                        st.rerun()
+
+    # ── Aba Pendentes ───────────────────────────────────────────────────────
+    with aba_pendentes:
+        st.markdown("### Contratos aguardando leitura")
+        _painel_contrato(cb.listar_por_status("Pendente"), mostrar_marcar_lido=True)
+
+    # ── Aba Em Revisão ──────────────────────────────────────────────────────
+    with aba_revisao:
+        st.markdown("### Contratos em revisão")
+        _painel_contrato(cb.listar_por_status("Em Revisão"), mostrar_marcar_lido=True)
+
+    # ── Aba Lidos ───────────────────────────────────────────────────────────
+    with aba_lidos:
+        st.markdown("### Contratos já lidos")
+        _painel_contrato(cb.listar_por_status("Lido"), mostrar_reabrir=True)
+
+    # ── Aba Arquivados ──────────────────────────────────────────────────────
+    with aba_arquivados:
+        st.markdown("### Contratos arquivados")
+        _painel_contrato(cb.listar_por_status("Arquivado"))
+
+    # ── Aba Todos ───────────────────────────────────────────────────────────
+    with aba_todos:
+        st.markdown("### Todos os contratos")
+        df_todos = cb.listar_todos()
+
+        if not df_todos.empty:
+            # Gráfico rápido por status
+            col_g1, col_g2 = st.columns(2)
+            with col_g1:
+                st.markdown("**Por Status**")
+                st.bar_chart(df_todos["Status"].value_counts())
+            with col_g2:
+                st.markdown("**Por Tipo**")
+                st.bar_chart(df_todos["Tipo"].value_counts())
+
+            st.markdown("---")
+            st.dataframe(
+                df_todos[["ID","Nome","Tipo","Parte_A","Parte_B","Status","Prioridade","Adicionado_em","Lido_em","Lido_por"]],
+                use_container_width=True, hide_index=True
+            )
+            buf = io.BytesIO()
+            df_todos.to_excel(buf, index=False)
+            st.download_button("⬇️ Exportar todos (.xlsx)", buf.getvalue(), "contratos.xlsx",
+                               "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                               use_container_width=True)
+        else:
+            st.info("Nenhum contrato cadastrado ainda.")
+
+    # ── Aba Novo Contrato ───────────────────────────────────────────────────
+    with aba_novo:
+        st.markdown("### Cadastrar novo contrato")
+
+        with st.form("form_novo_contrato", clear_on_submit=True):
+            col_n1, col_n2 = st.columns(2)
+            with col_n1:
+                nome_c = st.text_input("Nome / título do contrato *", placeholder="Ex.: Contrato de prestação de serviços médicos")
+                tipo_c = st.selectbox("Tipo *", cb.TIPO_OPTIONS)
+                parte_a = st.text_input("Parte A (contratante) *", placeholder="Nome da empresa ou pessoa")
+            with col_n2:
+                prioridade_c = st.selectbox("Prioridade *", cb.PRIORIDADE_OPTIONS)
+                tags_c = st.text_input("Tags (separadas por vírgula)", placeholder="vigente, urgente, renovação")
+                parte_b = st.text_input("Parte B (contratado) *", placeholder="Nome da empresa ou pessoa")
+
+            descricao_c = st.text_area("Descrição / resumo", placeholder="Breve descrição do objeto contratual...", height=100)
+            arquivo_up = st.file_uploader("Arquivo do contrato (PDF, DOCX, etc.)", type=["pdf", "docx", "doc", "txt", "png", "jpg"])
+
+            enviado_c = st.form_submit_button("➕ CADASTRAR CONTRATO", use_container_width=True)
+
+            if enviado_c:
+                if not nome_c or not parte_a or not parte_b:
+                    st.error("⚠️ Preencha: Nome, Parte A e Parte B.")
+                else:
+                    arq_bytes = arquivo_up.read() if arquivo_up else None
+                    arq_nome = arquivo_up.name if arquivo_up else None
+                    novo_id = cb.adicionar_contrato(
+                        nome=nome_c, tipo=tipo_c, parte_a=parte_a, parte_b=parte_b,
+                        descricao=descricao_c, prioridade=prioridade_c, tags=tags_c,
+                        arquivo_bytes=arq_bytes, arquivo_nome=arq_nome
+                    )
+                    st.success(f"✅ Contrato **#{novo_id:04d}** cadastrado com sucesso! Aparecerá na aba **Pendentes**.")
+                    st.balloons()
