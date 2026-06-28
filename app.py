@@ -43,16 +43,51 @@ html, body, [class*="css"] { font-family: 'Source Sans 3', Arial, sans-serif; }
 
 /* ── SIDEBAR ── */
 [data-testid="stSidebar"] {
-    background: #003d7a !important;
-    border-right: 4px solid #cc0000 !important;
+    background: #002d5c !important;
+    border-right: 5px solid #cc0000 !important;
+    min-width: 280px !important;
 }
 [data-testid="stSidebar"] * { color: #cce0f5 !important; }
-[data-testid="stSidebar"] .stRadio label {
-    font-size: 1rem !important;
-    font-weight: 600 !important;
-    padding: .4rem 0 !important;
+[data-testid="stSidebar"] hr { border-color: #1a4d80 !important; }
+
+/* Radio vira botão de menu */
+[data-testid="stSidebar"] [data-testid="stRadio"] > div {
+    gap: .6rem !important;
+    flex-direction: column !important;
 }
-[data-testid="stSidebar"] hr { border-color: #1a5c9a !important; }
+[data-testid="stSidebar"] [data-testid="stRadio"] label {
+    display: flex !important;
+    align-items: center !important;
+    background: rgba(255,255,255,.06) !important;
+    border: 1.5px solid rgba(255,255,255,.1) !important;
+    border-radius: 10px !important;
+    padding: .95rem 1.2rem !important;
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    transition: all .18s !important;
+    letter-spacing: .02em !important;
+    color: #a8d0f0 !important;
+    text-transform: none !important;
+}
+[data-testid="stSidebar"] [data-testid="stRadio"] label:hover {
+    background: rgba(255,255,255,.13) !important;
+    border-color: rgba(255,255,255,.25) !important;
+    color: #fff !important;
+    transform: translateX(4px) !important;
+}
+[data-testid="stSidebar"] [data-testid="stRadio"] label[data-checked="true"],
+[data-testid="stSidebar"] [data-testid="stRadio"] [aria-checked="true"] + label,
+[data-testid="stSidebar"] [data-testid="stRadio"] input:checked + div label {
+    background: #cc0000 !important;
+    border-color: #cc0000 !important;
+    color: #fff !important;
+    box-shadow: 0 4px 16px rgba(204,0,0,.45) !important;
+}
+/* Esconde radio circle nativo */
+[data-testid="stSidebar"] [data-testid="stRadio"] [data-testid="stMarkdownContainer"] { display:none !important; }
+[data-testid="stSidebar"] [data-testid="stRadio"] input[type="radio"] { display:none !important; }
+[data-testid="stSidebar"] .stRadio > label { display:none !important; }
 
 /* ── INPUTS ── */
 [data-testid="stTextInput"] input,
@@ -88,22 +123,27 @@ label,
     background: #003d7a !important;
     color: #fff !important;
     border: none !important;
-    border-radius: 4px !important;
-    font-weight: 700 !important;
-    font-size: 1.05rem !important;
-    padding: .9rem 2rem !important;
-    letter-spacing: .05em !important;
+    border-radius: 8px !important;
+    font-weight: 800 !important;
+    font-size: 1.15rem !important;
+    padding: 1.1rem 2rem !important;
+    letter-spacing: .06em !important;
     text-transform: uppercase !important;
-    box-shadow: 0 3px 10px rgba(0,61,122,.3) !important;
-    transition: background .15s !important;
+    box-shadow: 0 4px 16px rgba(0,61,122,.35), inset 0 1px 0 rgba(255,255,255,.12) !important;
+    transition: all .18s !important;
     width: 100% !important;
-    border-bottom: 4px solid #cc0000 !important;
+    border-bottom: 5px solid #cc0000 !important;
+    position: relative !important;
 }
 .stButton > button:hover {
-    background: #002d5a !important;
-    box-shadow: 0 5px 16px rgba(0,61,122,.45) !important;
+    background: #002a5c !important;
+    box-shadow: 0 8px 24px rgba(0,61,122,.5), inset 0 1px 0 rgba(255,255,255,.12) !important;
+    transform: translateY(-2px) !important;
 }
-.stButton > button:active { transform: translateY(1px) !important; }
+.stButton > button:active {
+    transform: translateY(1px) !important;
+    border-bottom-width: 2px !important;
+}
 
 /* ── DOWNLOAD BUTTON ── */
 .stDownloadButton > button {
@@ -261,27 +301,48 @@ def status_badge(s: str) -> str:
 
 # ── SIDEBAR ──
 with st.sidebar:
-    st.markdown("""
-    <div style="text-align:center;padding:1.75rem 1rem 1.25rem;border-bottom:1px solid #1a5c9a">
-      <div style="font-size:2.6rem">🏥</div>
-      <div style="font-size:1.1rem;font-weight:700;color:#fff;letter-spacing:.03em;margin-top:.4rem">UBS VILA NOVA</div>
-      <div style="font-size:.75rem;color:#7aaed4;margin-top:.15rem;text-transform:uppercase;letter-spacing:.06em">Unidade Básica de Saúde</div>
-      <div style="font-size:.72rem;color:#5a8ab0;margin-top:.4rem">CRS Centro · SMS-SP</div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.markdown("---")
-    aba = st.radio("Menu", ["📋 Atendimento", "📅 Agendados", "⚙️ Gerenciar"])
-    st.markdown("---")
     now = datetime.now()
+    dia_semana = now.strftime('%A').replace('Monday','Segunda').replace('Tuesday','Terça') \
+        .replace('Wednesday','Quarta').replace('Thursday','Quinta') \
+        .replace('Friday','Sexta').replace('Saturday','Sábado').replace('Sunday','Domingo')
+
     st.markdown(f"""
-    <div style="font-size:.85rem;line-height:2.2;color:#7aaed4">
-      📅 &nbsp;<span style="color:#fff;font-weight:700">{now.strftime('%d/%m/%Y')}</span><br>
-      🕐 &nbsp;<span style="color:#fff;font-weight:700">{now.strftime('%H:%M')}</span>
+    <div style="background:rgba(0,0,0,.25);margin:-1rem -1rem 1.25rem -1rem;padding:2rem 1.5rem 1.5rem;border-bottom:2px solid rgba(255,255,255,.08)">
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">
+        <div style="background:#cc0000;border-radius:10px;width:48px;height:48px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0">🏥</div>
+        <div>
+          <div style="font-size:1.05rem;font-weight:800;color:#fff;line-height:1.2">UBS VILA NOVA</div>
+          <div style="font-size:.7rem;color:#7aaed4;text-transform:uppercase;letter-spacing:.07em;margin-top:.15rem">Unidade Básica de Saúde</div>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,.06);border-radius:8px;padding:.75rem 1rem;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:.68rem;color:#7aaed4;text-transform:uppercase;letter-spacing:.06em">{dia_semana}</div>
+          <div style="font-size:1rem;color:#fff;font-weight:700;margin-top:.1rem">{now.strftime('%d/%m/%Y')}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:.68rem;color:#7aaed4;text-transform:uppercase;letter-spacing:.06em">Horário</div>
+          <div style="font-size:1rem;color:#fff;font-weight:700;margin-top:.1rem">{now.strftime('%H:%M')}</div>
+        </div>
+      </div>
     </div>
     """, unsafe_allow_html=True)
-    st.markdown("---")
-    st.markdown('<div style="font-size:.8rem;color:#4caf82;font-weight:700">● Sistema SIGA — Online</div>', unsafe_allow_html=True)
-    st.markdown('<div style="font-size:.72rem;color:#5a8ab0;margin-top:.5rem">v2.1 · Atenção Básica SP</div>', unsafe_allow_html=True)
+
+    st.markdown('<p style="font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:#5a8ab0;font-weight:700;margin-bottom:.5rem">Menu principal</p>', unsafe_allow_html=True)
+    aba = st.radio("Menu", ["📋 Atendimento", "📅 Agendados", "⚙️ Gerenciar"], label_visibility="collapsed")
+
+    st.markdown("""
+    <div style="margin-top:1.5rem;padding:1rem;background:rgba(255,255,255,.05);border-radius:8px;border:1px solid rgba(255,255,255,.08)">
+      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem">
+        <span style="width:8px;height:8px;background:#4caf82;border-radius:50%;display:inline-block"></span>
+        <span style="font-size:.8rem;color:#4caf82;font-weight:700">Sistema SIGA — Online</span>
+      </div>
+      <div style="font-size:.72rem;color:#5a8ab0;line-height:1.6">
+        CRS Centro · SMS-SP<br>
+        Atenção Básica · v2.1
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 df = load_db()
