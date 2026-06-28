@@ -1,72 +1,46 @@
-# 🏥 Telemedicina — Portal de Saúde
+# ClinícaVita — Central de Atendimento Médico
 
-Plataforma institucional de agendamentos médicos com visual de sistema público, cores verde e amarelo, painel administrativo completo e banco de dados em Excel. Construído com **Streamlit**.
+Sistema web de atendimento médico moderno, sem dependências externas — HTML, CSS e JavaScript puro.
 
-## Informações da clínica
+## Projetos
 
-| Campo | Informação |
+| Arquivo | Descrição |
 |---|---|
-| **Nome** | Telemedicina |
-| **Telefone** | (11) 93307-537 |
-| **WhatsApp** | (11) 93307-537 — 24/7 |
-| **E-mail** | contato@telemedicina.com |
-| **Endereço** | 8701 Charleville Blvd, Beverly Hills, CA 90211 |
-| **Horário** | 24/7 |
+| `atendimento-medico.html` | Central de atendimento com registro de pacientes e agenda do dia |
+| `declabsai.html` | Portal institucional de saúde (versão anterior) |
 
-## Design
+## atendimento-medico.html
 
-Visual inspirado em portais institucionais públicos de saúde:
-- **Barra superior** com identificação do portal e badge "24/7"
-- **Header institucional** com logo, nome, data e indicador de sistema online
-- **Alerta amarelo** com instruções ao paciente
-- **Breadcrumb** de navegação
-- **Painel hero** verde escuro com destaque amarelo
-- **Sidebar verde escura** com borda amarela
-- Protocolo numerado gerado ao agendar (`#0001`, `#0002`...)
+### Funcionalidades
 
-## Funcionalidades
+**Aba Atendimento**
+- Registro de paciente com nome, CPF, RG, data de nascimento e sexo
+- Contato: telefone/WhatsApp e e-mail
+- Seleção de especialidade e convênio
+- Campo de queixa principal / observações
+- Máscaras automáticas em CPF, RG e telefone
+- Validação de campos obrigatórios
 
-### Área do paciente
-- Página inicial com painel institucional e cards de serviços
-- Formulário de agendamento com CPF validado e geração de protocolo
-- Página de contato com formulário de mensagem
+**Aba Agendados**
+- Cards de resumo: total do dia, confirmados e aguardando
+- Tabela com avatar, nome, CPF, horário, especialidade, convênio e status
+- Busca em tempo real por nome ou CPF
+- Botão "Chamar" para atualizar status do paciente
+- Novos registros aparecem automaticamente na lista
 
-### Área administrativa (`🔒 Área restrita`)
-- Login com senha
-- Métricas: Total, Aguardando, Confirmados, Cancelados
-- Tabela completa de pacientes
-- Filtro por status
-- Atualização de status por protocolo (ID)
-- Exportação em `.xlsx`
+### Design
 
-**Senha do admin:** `clinica2024`
-> Altere `ADMIN_PASSWORD` no `app.py` antes de publicar.
+Paleta equilibrada — nem fria nem quente:
+- **Verde-salva** `#3d7f6e` como cor primária
+- **Âmbar** `#c8a96e` como cor de destaque
+- Fundo `#f4f6f5`, superfícies brancas, sombras suaves
+- Badges de status coloridos (confirmado, aguardando, realizado, cancelado)
+- Relógio em tempo real e indicador de sistema online no header
 
-## Banco de dados
+### Como usar
 
-Salvo automaticamente em `agendamentos.xlsx`:
-
-| ID | Nome | CPF | Telefone | Email | Data | Horario | Tipo | Observacoes | Recebido_em | Status |
-
-## Como rodar localmente
-
-```bash
-pip install -r requirements.txt
-python -m streamlit run app.py
-```
-
-## Deploy no Streamlit Cloud
-
-1. Repositório: [github.com/ttvzitxx-lab/clinica-saude](https://github.com/ttvzitxx-lab/clinica-saude)
-2. Acesse [share.streamlit.io](https://share.streamlit.io)
-3. Login com GitHub → **New app** → `ttvzitxx-lab/clinica-saude` → `app.py` → **Deploy**
-
-## Estrutura
+Abra o arquivo diretamente no navegador — nenhuma instalação necessária.
 
 ```
-.
-├── app.py               # Aplicação principal
-├── requirements.txt     # streamlit, pandas, openpyxl
-├── agendamentos.xlsx    # Banco de dados (gerado automaticamente)
-└── README.md
+atendimento-medico.html  →  abrir no navegador
 ```
