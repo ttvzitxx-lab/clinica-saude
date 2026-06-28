@@ -1,46 +1,82 @@
 # ClinícaVita — Central de Atendimento Médico
 
-Sistema web de atendimento médico moderno, sem dependências externas — HTML, CSS e JavaScript puro.
+Sistema web de atendimento médico moderno com interface Streamlit e versão HTML standalone.
+
+## 🚀 Acesso ao sistema
+
+**👉 [https://clinica-saude.streamlit.app](https://clinica-saude.streamlit.app)**
+
+> Deploy via [Streamlit Community Cloud](https://share.streamlit.io) — repositório: `ttvzitxx-lab/clinica-saude`
+
+---
 
 ## Projetos
 
 | Arquivo | Descrição |
 |---|---|
-| `atendimento-medico.html` | Central de atendimento com registro de pacientes e agenda do dia |
-| `declabsai.html` | Portal institucional de saúde (versão anterior) |
+| `app.py` | Interface Streamlit — atendimento, agenda e gerenciamento |
+| `atendimento-medico.html` | Versão HTML standalone (sem dependências) |
 
-## atendimento-medico.html
+---
 
-### Funcionalidades
+## app.py — Interface Streamlit
 
-**Aba Atendimento**
-- Registro de paciente com nome, CPF, RG, data de nascimento e sexo
+### Abas
+
+**📋 Atendimento**
+- Registro de paciente: nome, CPF, RG, data de nascimento, sexo
 - Contato: telefone/WhatsApp e e-mail
-- Seleção de especialidade e convênio
-- Campo de queixa principal / observações
-- Máscaras automáticas em CPF, RG e telefone
+- Especialidade e convênio
+- Campo de queixa / observações
+- Geração automática de protocolo (`#0001`, `#0002`...)
 - Validação de campos obrigatórios
 
-**Aba Agendados**
-- Cards de resumo: total do dia, confirmados e aguardando
-- Tabela com avatar, nome, CPF, horário, especialidade, convênio e status
+**📅 Agendados**
+- Métricas do dia: total, confirmados, aguardando, realizados
+- Tabela com badges de status coloridos
 - Busca em tempo real por nome ou CPF
-- Botão "Chamar" para atualizar status do paciente
-- Novos registros aparecem automaticamente na lista
+- Filtro por status
+- Exportação em `.xlsx`
+
+**⚙️ Gerenciar**
+- Atualização de status por protocolo
+- Visualização completa de todos os registros
+
+### Banco de dados
+
+Salvo automaticamente em `atendimentos.xlsx`:
+
+| ID | Nome | CPF | RG | Nascimento | Sexo | Telefone | Email | Especialidade | Convenio | Queixa | Data | Hora | Status |
 
 ### Design
 
-Paleta equilibrada — nem fria nem quente:
-- **Verde-salva** `#3d7f6e` como cor primária
-- **Âmbar** `#c8a96e` como cor de destaque
-- Fundo `#f4f6f5`, superfícies brancas, sombras suaves
-- Badges de status coloridos (confirmado, aguardando, realizado, cancelado)
-- Relógio em tempo real e indicador de sistema online no header
+- Sidebar escura `#1e2d28` com navegação lateral
+- Verde-salva `#3d7f6e` como cor primária
+- Badges de status: aguardando (âmbar), confirmado (verde), realizado (azul), cancelado (vermelho)
 
-### Como usar
+---
 
-Abra o arquivo diretamente no navegador — nenhuma instalação necessária.
+## Como rodar localmente
+
+```bash
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+## Deploy no Streamlit Cloud
+
+1. Acesse [share.streamlit.io](https://share.streamlit.io)
+2. Login com GitHub → **New app**
+3. Repositório: `ttvzitxx-lab/clinica-saude` → arquivo: `app.py`
+4. Clique em **Deploy**
+
+## Estrutura
 
 ```
-atendimento-medico.html  →  abrir no navegador
+.
+├── app.py                   # Interface Streamlit principal
+├── atendimento-medico.html  # Versão HTML standalone
+├── requirements.txt         # streamlit, pandas, openpyxl
+├── atendimentos.xlsx        # Banco de dados (gerado automaticamente)
+└── README.md
 ```
