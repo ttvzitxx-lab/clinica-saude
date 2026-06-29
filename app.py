@@ -5,7 +5,7 @@ import os
 import io
 
 DB_FILE = "atendimentos.xlsx"
-ADMIN_SENHA = "admin2024"
+ADMIN_SENHA = "Vitaclinica"
 
 ESPECIALIDADES = [
     "Clínica Geral", "Cardiologia", "Dermatologia",
